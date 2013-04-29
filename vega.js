@@ -2324,7 +2324,47 @@ vg.data.size = function(size, group) {
     return (typeof d === 'string') ? group[d] : d;
   });
   return size;
-};vg.data.load = function(uri, callback) {
+};
+
+vg.data.sparql = (function() {
+  var parser = {
+    parse: parseSparql
+  };
+
+  function parseSparql(data) {
+    var tabular_data = [];
+
+    // Get the variables used in the query
+    var vars = data.head.vars;
+
+    if (data.results && data.results.bindings 
+      && data.results.bindings.length > 0) {
+
+      // the data has results
+      // every binding is a row in the results
+      for (var iB = 0; iB < data.results.bindings.length; iB++) {
+        var aBinding = data.results.bindings[iB];
+        var anEntry = {};
+
+        for (var iVar = 0; iVar < vars.length; iVar++) {
+          var checkVar = vars[iVar];
+          if (aBinding[checkVar]) {
+            anEntry[checkVar] = aBinding[checkVar].value;
+          }
+        }
+
+        tabular_data.push(anEntry);
+      }
+
+    }
+
+    return tabular_data;
+  }
+  
+  return parser;
+})();
+
+vg.data.load = function(uri, callback) {
   if (vg.config.isNode) {
     // in node.js, consult base url and select file or http
     var url = vg_load_hasProtocol(uri) ? uri : vg.config.baseURL + uri,
@@ -2349,7 +2389,7 @@ function vg_load_isFile(url) {
 
 function vg_load_xhr(url, callback) {
   vg.log("LOAD: " + url);
-  d3.xhr(url, function(err, resp) {
+  d3.xhr(url, "application/sparql-results+json", function(err, resp) {
     if (resp) resp = resp.responseText;
     callback(err, resp);
   });
@@ -2404,6 +2444,12 @@ function vg_load_http(url, callback) {
     var d = d3.tsv.parse(data);
     return d;
   };
+
+  formats.sparql = function (data, format) {
+    var jsonData = JSON.parse(data);
+    var d = vg.data.sparql.parse(jsonData);  // The sparql parser to d3 format
+    return d;
+  }
   
   function parseValues(data, types) {
     var cols = vg.keys(types),

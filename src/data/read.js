@@ -30,6 +30,12 @@ vg.data.read = (function() {
     var d = d3.tsv.parse(data);
     return d;
   };
+
+  formats.sparql = function (data, format) {
+    var jsonData = JSON.parse(data);
+    var d = vg.data.sparql.parse(jsonData);  // The sparql parser to d3 format
+    return d;
+  }
   
   function parseValues(data, types) {
     var cols = vg.keys(types),

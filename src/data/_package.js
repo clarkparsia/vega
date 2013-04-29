@@ -21,3 +21,4 @@ vg.data.size = function(size, group) {
   });
   return size;
 };
+
