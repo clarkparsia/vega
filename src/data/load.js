@@ -20,7 +20,7 @@ vg.data.loadSparql = function(query, endpoint, callback) {
     vg_load_http(url, callback);
   } else {
     // in browser, use xhr
-    vg_load_xhr(url, callback);
+    vg_load_xhr_mime(url, callback, "application/sparql-results+json");
   }
 }
 
@@ -36,11 +36,21 @@ function vg_load_isFile(url) {
 }
 
 function vg_load_xhr(url, callback) {
+  vg_load_xhr_mime(url, callback);
+}
+
+function vg_load_xhr_mime(url, callback, mime_type) {
   vg.log("LOAD: " + url);
-  d3.xhr(url, "application/sparql-results+json", function(err, resp) {
+  var cb = function(err, resp) {
     if (resp) resp = resp.responseText;
     callback(err, resp);
-  });
+  };
+
+  if (mime_type) {
+    d3.xhr(url, mime_type, cb);
+  } else {
+    d3.xhr(url, cb);
+  }
 }
 
 function vg_load_file(file, callback) {
