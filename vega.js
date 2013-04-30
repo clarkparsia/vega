@@ -2376,6 +2376,20 @@ vg.data.load = function(uri, callback) {
   }  
 };
 
+vg.data.loadSparql = function(query, endpoint, callback) {
+  // build the url using the endpoint and the query
+  var url = vg_load_hasProtocol(endpoint) ? endpoint : vg.config.baseURL + endpoint;
+  url = url + "?query=" + encodeURIComponent(query);
+  url = url + "&format=" + encodeURIComponent("application/sparql-results+json");
+
+  if (vg.config.isNode) {
+    vg_load_http(url, callback);
+  } else {
+    // in browser, use xhr
+    vg_load_xhr(url, callback);
+  }
+}
+
 var vg_load_protocolRE = /^[A-Za-z]+\:\/\//;
 var vg_load_fileProtocol = "file://";
 
@@ -3634,6 +3648,13 @@ function vg_load_http(url, callback) {
     if (d.url) {
       count += 1;
       vg.data.load(d.url, load(d)); 
+    }
+
+    if (d.sparql) {
+      count += 1;
+      var aSparqlQuery = d.sparql.query || "";
+      var anEndpoint = d.sparql.endpoint || null;
+      vg.data.loadSparql(aSparqlQuery, anEndpoint, load(d));
     }
      
     if (d.values) {

@@ -24,6 +24,13 @@ vg.parse.data = function(spec, callback) {
       count += 1;
       vg.data.load(d.url, load(d)); 
     }
+
+    if (d.sparql) {
+      count += 1;
+      var aSparqlQuery = d.sparql.query || "";
+      var anEndpoint = d.sparql.endpoint || null;
+      vg.data.loadSparql(aSparqlQuery, anEndpoint, load(d));
+    }
      
     if (d.values) {
       if (d.format && d.format.parse) {
