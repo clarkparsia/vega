@@ -3105,17 +3105,20 @@ function vg_load_http(url, callback) {
       params = ["offset", "order"],
       output = {
         "y0": "y2",
-        "y1": "y"
+        "y1": "y",
+        "cy": "cy"
       };
 
   function stack(data) {
     var out_y0 = output["y0"],
-        out_y1 = output["y1"];
+        out_y1 = output["y1"],
+        out_cy = output["cy"];
     
     layout.out(function(d, y0, y) {
       if (d.datum) {
         d.datum[out_y0] = y0;
         d.datum[out_y1] = y + y0;
+        d.datum[out_cy] = y0 + y/2;
       }
     })(stacks(data));
     
@@ -5840,6 +5843,11 @@ vg.headless = {};vg.headless.View = (function() {
       this._padding = pad;
       this.initialize();
     }
+    return this;
+  };
+
+  prototype.viewport = function() {
+    if (!arguments.length) return null;
     return this;
   };
 
